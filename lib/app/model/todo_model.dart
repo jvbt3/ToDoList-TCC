@@ -4,12 +4,14 @@ class TodoModel {
   DateTime? criacao;
   String? prioridade;
   String? descricao;
+  String? status;
   TodoModel({
     this.id,
     this.titulo,
     this.criacao,
     this.prioridade,
     this.descricao,
+    this.status,
   });
 
   Map<String, dynamic> toMap() {
@@ -19,6 +21,7 @@ class TodoModel {
       'criacao': criacao?.millisecondsSinceEpoch,
       'prioridade': prioridade,
       'descricao': descricao,
+      'status': status
     };
   }
 
@@ -32,6 +35,7 @@ class TodoModel {
       prioridade:
           json['prioridade'] != null ? json['prioridade'] as String : null,
       descricao: json['descricao'] != null ? json['descricao'] as String : null,
+      status: json['status'] != null ? json['status'] as String : null,
     );
   }
   static List<TodoModel> fromJsonList(List<Map<String, dynamic>> jsonList) {

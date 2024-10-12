@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:todolistbloc/app/model/todo_model.dart';
 import 'package:todolistbloc/app/module/home/controller/home_page_controller.dart';
+import 'package:todolistbloc/app/module/home/widgets/home_page_abertas.dart';
+import 'package:todolistbloc/app/module/home/widgets/home_page_execucao.dart';
+import 'package:todolistbloc/app/module/home/widgets/home_page_fechadas.dart';
 
 class HomePage extends StatefulWidget {
   final HomePageController controller;
@@ -12,11 +15,21 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
     widget.controller.todoList();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   TodoModel todo = TodoModel();
@@ -41,6 +54,14 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('To-Do-List'),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(text: 'Abertas'),
+              Tab(text: 'Em Execução'),
+              Tab(text: 'Fechadas'),
+            ],
+          ),
           actions: [
             IconButton(
               onPressed: () {
@@ -68,66 +89,13 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             Expanded(
-              child: BlocBuilder<HomePageController, HomePageState>(
-                bloc: widget.controller,
-                builder: (context, state) {
-                  if (state.status == HomePageStatus.complete &&
-                      state.todoModel.isNotEmpty) {
-                    return ListView.builder(
-                      itemCount: state.todoModel.length,
-                      itemBuilder: (context, index) {
-                        todo = state.todoModel[index];
-                        return Card(
-                          child: ListTile(
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Título: ${todo.titulo}'),
-                                    Text('Descrição: ${todo.descricao}'),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit),
-                                      onPressed: () async {
-                                        final todo = state.todoModel[index];
-                                        Modular.to.pushNamed(
-                                          'update',
-                                          arguments: todo,
-                                        );
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete),
-                                      onPressed: () async {
-                                        await widget.controller.deleteTodo(
-                                            id: state.todoModel[index].id!);
-                                        await widget.controller.todoList();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            subtitle: Text(
-                              'Prioridade: ${state.todoModel[index].prioridade!}',
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  } else if (state.status == HomePageStatus.complete &&
-                      state.todoModel.isEmpty) {
-                    return const Center(
-                      child: Text('Nenhum item na lista.'),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  HomePageAbertas(controller: widget.controller),
+                  HomePageExecucao(controller: widget.controller),
+                  HomePageFechadas(controller: widget.controller),
+                ],
               ),
             ),
           ],

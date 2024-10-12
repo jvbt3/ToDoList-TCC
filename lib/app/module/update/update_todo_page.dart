@@ -4,7 +4,8 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:todolistbloc/app/model/todo_model.dart';
 import 'package:todolistbloc/app/module/update/controller/update_todo_controller.dart';
 
-const List<String> list = <String>['Baixa', 'Média', 'Alta'];
+const List<String> listPrioridade = <String>['Baixa', 'Média', 'Alta'];
+const List<String> listStatus = <String>['Aberto', 'Em execução', 'Fechado'];
 
 class UpdateTodoPage extends StatefulWidget {
   final UpdateTodoController controller;
@@ -24,7 +25,8 @@ class _UpdateTodoPageState extends State<UpdateTodoPage> {
   late TextEditingController tituloController;
   late TextEditingController descricaoController;
   final _formKey = GlobalKey<FormState>();
-  late String dropdownValue;
+  late String dropdownValueS;
+  late String dropdownValueP;
 
   @override
   void initState() {
@@ -32,7 +34,16 @@ class _UpdateTodoPageState extends State<UpdateTodoPage> {
     tituloController = TextEditingController(text: widget.todoModel.titulo);
     descricaoController =
         TextEditingController(text: widget.todoModel.descricao);
-    dropdownValue = widget.todoModel.prioridade ?? list.first;
+
+    // Atribui um valor padrão que é um item existente na lista
+    dropdownValueP = listPrioridade.contains(widget.todoModel.prioridade)
+        ? widget.todoModel.prioridade!
+        : listPrioridade
+            .first; // Use o primeiro item como padrão se não existir
+
+    dropdownValueS = listStatus.contains(widget.todoModel.status)
+        ? widget.todoModel.status!
+        : listStatus.first; // Use o primeiro item como padrão se não existir
   }
 
   @override
@@ -100,9 +111,9 @@ class _UpdateTodoPageState extends State<UpdateTodoPage> {
                       ),
                       const SizedBox(height: 10),
                       DropdownButtonFormField<String>(
-                        value: dropdownValue,
-                        items:
-                            list.map<DropdownMenuItem<String>>((String value) {
+                        value: dropdownValueP,
+                        items: listPrioridade
+                            .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(value),
@@ -110,11 +121,31 @@ class _UpdateTodoPageState extends State<UpdateTodoPage> {
                         }).toList(),
                         onChanged: (String? value) {
                           setState(() {
-                            dropdownValue = value!;
+                            dropdownValueP = value!;
                           });
                         },
                         decoration: const InputDecoration(
                           labelText: 'Prioridade',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      DropdownButtonFormField<String>(
+                        value: dropdownValueS,
+                        items: listStatus
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? value) {
+                          setState(() {
+                            dropdownValueS = value!;
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          labelText: 'Status',
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -128,7 +159,9 @@ class _UpdateTodoPageState extends State<UpdateTodoPage> {
                                       tituloController.text;
                                   widget.todoModel.descricao =
                                       descricaoController.text;
-                                  widget.todoModel.prioridade = dropdownValue;
+                                  widget.todoModel.prioridade = dropdownValueP;
+                                  widget.todoModel.status = dropdownValueS;
+
                                   widget.controller
                                       .updateTodo(todoModel: widget.todoModel);
                                 }

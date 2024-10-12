@@ -13,14 +13,73 @@ class HomePageController extends Cubit<HomePageState> {
         super(HomePageState.initial());
 
   Future<void> todoList() async {
+    List<TodoModel> todoListaAbertas = [];
     try {
       emit(state.copyWith(status: HomePageStatus.loading));
       var todoList = await _homePageService.findTodo();
 
+      for (var f in todoList) {
+        if (f.status == 'Aberto') {
+          todoListaAbertas.add(f);
+        }
+      }
+
       emit(
         state.copyWith(
           status: HomePageStatus.complete,
-          todoModel: todoList,
+          todoModel: todoListaAbertas,
+        ),
+      );
+    } catch (e, s) {
+      emit(state.copyWith(
+        status: HomePageStatus.failure,
+        errorMessage: "Erro ao consultar tarefas - $s",
+      ));
+    }
+  }
+
+  Future<void> todoListExecucao() async {
+    List<TodoModel> todoListExecucao = [];
+    try {
+      emit(state.copyWith(status: HomePageStatus.loading));
+      var todoList = await _homePageService.findTodo();
+
+      for (var f in todoList) {
+        if (f.status == 'Em execução') {
+          todoListExecucao.add(f);
+        }
+      }
+
+      emit(
+        state.copyWith(
+          status: HomePageStatus.complete,
+          todoModel: todoListExecucao,
+        ),
+      );
+    } catch (e, s) {
+      emit(state.copyWith(
+        status: HomePageStatus.failure,
+        errorMessage: "Erro ao consultar tarefas - $s",
+      ));
+    }
+  }
+
+  Future<void> todoListFechadas() async {
+    List<TodoModel> todoListFechadas = [];
+    try {
+      emit(state.copyWith(status: HomePageStatus.loading));
+      var todoList = await _homePageService.findTodo();
+
+      for (var f in todoList) {
+        if (f.status == 'Fechado') {
+          todoListFechadas.add(f);
+        }
+      }
+
+      emit(
+        state.copyWith(
+          status: HomePageStatus.complete,
+          todoModel: todoListFechadas,
         ),
       );
     } catch (e, s) {
