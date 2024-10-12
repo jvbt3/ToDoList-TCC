@@ -4,6 +4,8 @@ import 'package:todolistbloc/app/app_module.dart';
 import 'package:todolistbloc/app/app_widget.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   return runApp(
     ModularApp(
       module: AppModule(),
